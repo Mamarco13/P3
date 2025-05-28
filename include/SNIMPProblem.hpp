@@ -63,7 +63,7 @@ public:
         for (bool bit : sol) {
             if (bit) count++;
         }
-    
+
         // Reparación automática
         if (count < m) {
             while (count < m) {
@@ -82,7 +82,7 @@ public:
                 }
             }
         }
-    
+
         // Validación extra por si acaso
         int finalCount = 0;
         std::vector<int> seeds;
@@ -92,15 +92,14 @@ public:
                 finalCount++;
             }
         }
-    
+
         if (finalCount != m) {
             throw std::runtime_error("La solución no tiene exactamente " + std::to_string(m) + " nodos seleccionados.");
         }
-    
-        unsigned int semillaEval = Random::get(0u, 1000000000u);
-        return runICM(graph, seeds, p, ev, semillaEval);
+
+        // Uso de semilla reproducible
+        return runICM(graph, seeds, p, ev, seedBase);
     }
-    
 
     size_t getSolutionSize() override {
         return graph.numNodes;

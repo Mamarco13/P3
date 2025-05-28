@@ -7,7 +7,7 @@ INC_DIR = include
 COMMON_DIR = common
 
 # Compilador y flags
-CXX = g++
+CXX = g++ 
 CXXFLAGS = -std=c++17 -Wall -O2 -I$(INC_DIR) -I$(COMMON_DIR)
 
 # Archivos fuente
@@ -17,7 +17,8 @@ SRCS = \
 	$(SRC_DIR)/icm.cpp \
 	$(SRC_DIR)/random_solver.cpp \
 	$(SRC_DIR)/greedy_solver.cpp \
-	$(SRC_DIR)/localsearch_solver.cpp
+	$(SRC_DIR)/localsearch_solver.cpp \
+	$(SRC_DIR)/simulated_annealing.cpp
 
 # Objeto resultante
 OBJS = $(SRCS:.cpp=.o)
@@ -37,22 +38,15 @@ clean:
 # Recompila si cambia algún header
 $(SRCS): $(HEADERS)
 
-# Headers opcionales (esto no fuerza recompilación automática, pero da trazabilidad)
+# Headers opcionales
 HEADERS = \
-	$(INC_DIR)/GeneticAlgorithm.hpp \
-	$(INC_DIR)/AGG_SinOrden.hpp \
-	$(INC_DIR)/AGG_ConOrden.hpp \
-	$(INC_DIR)/AGE_SinOrden.hpp \
-	$(INC_DIR)/AGE_ConOrden.hpp \
-	$(INC_DIR)/AM_10_1.hpp \
-	$(INC_DIR)/AM_10_01.hpp \
-	$(INC_DIR)/AM_10_01mej.hpp \
+	$(INC_DIR)/simulated_annealing.hpp \
 	$(INC_DIR)/SNIMPProblem.hpp \
-	$(COMMON_DIR)/problem.h \
-	$(COMMON_DIR)/solution.h \
-	$(COMMON_DIR)/util.h \
-	$(COMMON_DIR)/mh.h \
-	$(COMMON_DIR)/mhtrayectory.h \
+	$(COMMON_DIR)/problem.hpp \
+	$(COMMON_DIR)/solution.hpp \
+	$(COMMON_DIR)/util.hpp \
+	$(COMMON_DIR)/mh.hpp \
+	$(COMMON_DIR)/mhtrayectory.hpp \
 	$(COMMON_DIR)/random.hpp \
 	$(INC_DIR)/graph_loader.hpp \
 	$(INC_DIR)/icm.hpp \
