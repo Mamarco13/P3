@@ -20,7 +20,11 @@ SRCS = \
 	$(SRC_DIR)/localsearch_solver.cpp \
 	$(SRC_DIR)/simulated_annealing.cpp \
 	$(SRC_DIR)/local_search_runner.cpp \
-	$(SRC_DIR)/BMB.cpp
+	$(SRC_DIR)/BMB.cpp \
+	$(SRC_DIR)/ILS.cpp \
+	$(SRC_DIR)/GRASP.cpp
+
+
 
 
 # Objeto resultante
@@ -57,6 +61,8 @@ HEADERS = \
 	$(INC_DIR)/random_solver.hpp \
 	$(INC_DIR)/greedy_solver.hpp \
 	$(INC_DIR)/local_search_runner.hpp \
-	$(INC_DIR)/localsearch_solver.hpp
+	$(INC_DIR)/localsearch_solver.hpp \
+	$(INC_DIR)/GRASP.hpp \
+	$(INC_DIR)/ILS.hpp
 
 .PHONY: all clean

@@ -11,10 +11,11 @@ ResultMH SimulatedAnnealing::optimize(Problem *problem, const tSolution &initial
   tFitness best_fitness = current_fitness;
 
   int m = problem->getSolutionSize();
-  int max_neighbors = 5 * m;
+
+  // 🔧 Limitamos el número de vecinos por temperatura a un valor razonable
+  int max_neighbors = std::min(5 * m, 100);
   int max_successes = static_cast<int>(0.1 * max_neighbors);
   int M = std::max(1, maxevals / max_neighbors);
-
 
   double mu = 0.2;
   double phi = 0.3;
@@ -30,12 +31,12 @@ ResultMH SimulatedAnnealing::optimize(Problem *problem, const tSolution &initial
   for (int k = 0; k < M && evals < maxevals; ++k) {
     int successes = 0, neighbors = 0;
 
-    while (neighbors < max_neighbors && successes < max_successes && evals < maxevals) {
+    while (neighbors < max_neighbors && successes < max_successes &&
+           evals < (k + 1) * max_neighbors && evals < maxevals) {
+
       int pos = effolkronium::random_static::get(0, m - 1);
 
-      // Cambiamos directamente al otro valor booleano (sin repetir)
       tDomain new_value = !current[pos];
-
       tFitness new_fitness = problem->fitness(current, info, pos, new_value);
       evals++;
 
@@ -57,7 +58,8 @@ ResultMH SimulatedAnnealing::optimize(Problem *problem, const tSolution &initial
     }
 
     if (successes == 0) break;
-    T = T / (1 + beta * T);
+
+    T = T / (1 + beta * T); // Enfriamiento Cauchy modificado
   }
 
   return ResultMH(best, best_fitness, evals);

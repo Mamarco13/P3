@@ -108,6 +108,12 @@ public:
     std::pair<tDomain, tDomain> getSolutionDomainRange() override {
         return {0, 1};
     }
+
+    int getNodeDegree(int node) const {
+        return graph.adjList[node].size();
+    }
+
+
 };
 
 #endif // SNIMP_PROBLEM_HPP
