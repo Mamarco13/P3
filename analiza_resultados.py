@@ -1,51 +1,74 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os
 
-# Cargar CSV
-df = pd.read_csv("resultados.csv")
+# Leer CSV combinado
+df = pd.read_csv("resultados_todos.csv")
 
-# Calcular estadísticas por algoritmo
-resumen = df.groupby("Algoritmo").agg(
-    Media_Fitness=("Fitness", "mean"),
-    Desviacion_Fitness=("Fitness", "std"),
-    Tiempo_Medio=("Tiempo", "mean"),
+# Carpeta para tablas y gráficas
+os.makedirs("graficas", exist_ok=True)
+os.makedirs("tablas", exist_ok=True)
+
+# TABLA 1 — Una por grafo
+for grafo in df["Grafo"].unique():
+    df_grafo = df[df["Grafo"] == grafo].copy()
+
+    # Ranking por fitness
+    df_grafo["Posicion"] = df_grafo.groupby("Seed")["Fitness"].rank(ascending=False, method="min")
+
+    tabla1 = df_grafo.groupby("Algoritmo").agg(
+        Fitness_Medio=("Fitness", "mean"),
+        Tiempo_Medio=("Tiempo", "mean"),
+        Evaluaciones_Promedio=("Evaluaciones", "mean"),
+        Posicion_Media=("Posicion", "mean")
+    ).reset_index()
+
+    # Reordenar columnas como en el guion
+    tabla1 = tabla1[["Algoritmo", "Posicion_Media", "Fitness_Medio", "Tiempo_Medio", "Evaluaciones_Promedio"]]
+
+    # Mostrar y guardar
+    print(f"\n📋 Tabla 1 – Resultados para grafo: {grafo}")
+    print(tabla1.to_string(index=False, float_format="%.2f"))
+    tabla1.to_csv(f"tablas/tabla1_{grafo.replace('.txt','')}.csv", index=False)
+
+# TABLA 2 — Consolidada por algoritmo (promedios globales)
+df["Rank"] = df.groupby(["Grafo", "Seed"])["Fitness"].rank(ascending=False, method="min")
+
+
+tabla2 = df.groupby("Algoritmo").agg(
+    Posicion_Promedia=("Rank", "mean"),
+    Tiempo_Promedio=("Tiempo", "mean"),
     Evaluaciones_Promedio=("Evaluaciones", "mean")
 ).reset_index()
 
-# Calcular ranking por semilla (1 = mejor)
-df["Rank"] = df.groupby("Seed")["Fitness"].rank(ascending=False, method="min")
+print("\n📊 Tabla 2 – Resultados Promedios (todos los grafos):")
+print(tabla2.to_string(index=False, float_format="%.2f"))
+tabla2.to_csv("tablas/tabla2_final.csv", index=False)
 
-# Agregar ranking promedio
-ranking_promedio = df.groupby("Algoritmo")["Rank"].mean().reset_index().rename(columns={"Rank": "Posicion_Promedio"})
+# GRÁFICOS ESTILO "QUESITO" (Barras circulares simuladas)
 
-# Combinar con resumen
-tabla_final = pd.merge(resumen, ranking_promedio, on="Algoritmo")
+# Tiempo Medio
+plt.figure(figsize=(7, 7))
+plt.pie(tabla2["Tiempo_Promedio"], labels=tabla2["Algoritmo"], autopct="%1.1f%%", startangle=90)
+plt.title("Distribución de Tiempo Promedio por Algoritmo")
+plt.savefig("graficas/pastel_tiempo_promedio.png")
+plt.close()
 
-# Ordenar por posición promedio
-tabla_final = tabla_final.sort_values("Posicion_Promedio")
+# Evaluaciones Promedio
+plt.figure(figsize=(7, 7))
+plt.pie(tabla2["Evaluaciones_Promedio"], labels=tabla2["Algoritmo"], autopct="%1.1f%%", startangle=90)
+plt.title("Distribución de Evaluaciones Promedio por Algoritmo")
+plt.savefig("graficas/pastel_evaluaciones.png")
+plt.close()
 
-# Mostrar resultados
-print("\n=== Tabla resumen para tu memoria ===")
-print(tabla_final.to_string(index=False, float_format="%.2f"))
-
-# Guardar en CSV para la memoria
-tabla_final.to_csv("tabla_memoria.csv", index=False)
-
-# Boxplot: comparación de fitness por algoritmo
+# Posición Promedio
 plt.figure(figsize=(10, 6))
-sns.boxplot(data=df, x="Algoritmo", y="Fitness")
+sns.barplot(data=tabla2, x="Algoritmo", y="Posicion_Promedia")
+plt.title("Posición Promedio por Algoritmo (menor es mejor)")
 plt.xticks(rotation=45)
-plt.title("Boxplot de Fitness por Algoritmo")
 plt.tight_layout()
-plt.savefig("boxplot_fitness.png")
-plt.show()
+plt.savefig("graficas/barras_posicion_promedio.png")
+plt.close()
 
-# Gráfico de tiempo medio por algoritmo
-plt.figure(figsize=(10, 6))
-sns.barplot(data=tabla_final, x="Algoritmo", y="Tiempo_Medio")
-plt.xticks(rotation=45)
-plt.title("Tiempo Medio por Algoritmo")
-plt.tight_layout()
-plt.savefig("tiempo_medio.png")
-plt.show()
+print("\n✅ Tablas y gráficas generadas en carpetas: 'tablas/' y 'graficas/'")
